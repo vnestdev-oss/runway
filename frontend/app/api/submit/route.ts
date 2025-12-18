@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServiceSupabase } from "@/lib/supabase";
-import { sendApplicationEmail } from "@/lib/email";
+import { sendApplicationEmail, sendConfirmationEmail } from "@/lib/email";
 
 export async function POST(request: NextRequest) {
   try {
@@ -49,39 +49,8 @@ export async function POST(request: NextRequest) {
 
     const consent = formData.get("consent") === "true";
 
-    const pptFile = formData.get("pptFile") as File | null;
-
     // Initialize Supabase client
     const supabase = getServiceSupabase();
-    
-    let pptFileUrl = null;
-
-    // Upload PPT file to Supabase Storage if present
-    if (pptFile) {
-      const fileExt = pptFile.name.split('.').pop();
-      const fileName = `${studentDetails.registerNumber}_${Date.now()}.${fileExt}`;
-      const filePath = `applications/${fileName}`;
-
-      const fileBuffer = await pptFile.arrayBuffer();
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from(process.env.SUPABASE_STORAGE_BUCKET || 'application-files')
-        .upload(filePath, fileBuffer, {
-          contentType: pptFile.type,
-          upsert: false,
-        });
-
-      if (uploadError) {
-        console.error("File upload error:", uploadError);
-        throw new Error("Failed to upload PPT file");
-      }
-
-      // Get public URL for the uploaded file
-      const { data: urlData } = supabase.storage
-        .from(process.env.SUPABASE_STORAGE_BUCKET || 'application-files')
-        .getPublicUrl(filePath);
-
-      pptFileUrl = urlData.publicUrl;
-    }
 
     const submittedAt = new Date().toISOString();
 
@@ -101,7 +70,6 @@ export async function POST(request: NextRequest) {
         target_users: startupAbstract.targetUsers,
         innovation: startupAbstract.innovation,
         ppt_link: startupAbstract.pptLink,
-        ppt_file_url: pptFileUrl,
         faculty_name: facultyMentor.facultyName,
         faculty_department: facultyMentor.facultyDepartment,
         faculty_email: facultyMentor.facultyEmail,
@@ -146,15 +114,28 @@ export async function POST(request: NextRequest) {
       startupName: startupAbstract.startupName,
       problemStatement: startupAbstract.problemStatement,
       proposedSolution: startupAbstract.proposedSolution,
+      pptLink: startupAbstract.pptLink,
       facultyName: facultyMentor.facultyName,
       facultyEmail: facultyMentor.facultyEmail,
       resources: resources,
       submittedAt: submittedAt,
     };
 
-    // Send email without blocking response
+    // Send admin notification email without blocking response
     sendApplicationEmail(emailData).catch((error) => {
-      console.error("Email sending error:", error);
+      console.error("Admin email sending error:", error);
+      // Don't fail the request if email fails
+    });
+
+    // Send confirmation email to applicant without blocking response
+    sendConfirmationEmail({
+      fullName: studentDetails.fullName,
+      email: studentDetails.email,
+      registerNumber: studentDetails.registerNumber,
+      startupName: startupAbstract.startupName,
+      submittedAt: submittedAt,
+    }).catch((error) => {
+      console.error("Confirmation email sending error:", error);
       // Don't fail the request if email fails
     });
 

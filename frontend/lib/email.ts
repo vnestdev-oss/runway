@@ -21,6 +21,7 @@ export const generateApplicationEmail = (data: {
   startupName: string;
   problemStatement: string;
   proposedSolution: string;
+  pptLink: string;
   facultyName: string;
   facultyEmail: string;
   resources: any[];
@@ -79,6 +80,7 @@ export const generateApplicationEmail = (data: {
           <div class="field"><span class="label">Startup Name:</span> ${data.startupName}</div>
           <div class="field"><span class="label">Problem Statement:</span> ${data.problemStatement}</div>
           <div class="field"><span class="label">Proposed Solution:</span> ${data.proposedSolution}</div>
+          <div class="field"><span class="label">PPT Link:</span> <a href="${data.pptLink}">${data.pptLink}</a></div>
         </div>
         
         <div class="section">
@@ -114,7 +116,88 @@ export const generateApplicationEmail = (data: {
   `;
 };
 
-// Send application notification email
+// Confirmation email template for applicant
+export const generateConfirmationEmail = (data: {
+  fullName: string;
+  registerNumber: string;
+  startupName: string;
+  submittedAt: string;
+}) => {
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #4F46E5; color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0; }
+        .content { background-color: #ffffff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px; }
+        .success-icon { font-size: 48px; margin-bottom: 10px; }
+        .highlight { background-color: #f0fdf4; padding: 15px; border-left: 4px solid #22c55e; margin: 20px 0; border-radius: 4px; }
+        .info-box { background-color: #f9fafb; padding: 15px; border-radius: 8px; margin: 20px 0; }
+        .info-row { margin: 10px 0; }
+        .label { font-weight: bold; color: #555; }
+        .value { color: #111; }
+        .footer { text-align: center; margin-top: 30px; color: #6b7280; font-size: 14px; }
+        .button { display: inline-block; background-color: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <div class="success-icon">✅</div>
+          <h1 style="margin: 0; font-size: 28px;">Application Submitted Successfully!</h1>
+        </div>
+        
+        <div class="content">
+          <p style="font-size: 16px; margin-bottom: 20px;">Dear <strong>${data.fullName}</strong>,</p>
+          
+          <p>Thank you for submitting your application to <strong>Runway VNEST</strong>! We have successfully received your startup idea submission.</p>
+          
+          <div class="highlight">
+            <p style="margin: 0;"><strong>✨ Your application has been recorded and is now under review by our team.</strong></p>
+          </div>
+          
+          <div class="info-box">
+            <h3 style="margin-top: 0; color: #4F46E5;">Application Details</h3>
+            <div class="info-row">
+              <span class="label">Startup/Idea Name:</span>
+              <span class="value">${data.startupName}</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Register Number:</span>
+              <span class="value">${data.registerNumber}</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Submitted On:</span>
+              <span class="value">${new Date(data.submittedAt).toLocaleString('en-IN', { 
+                dateStyle: 'long', 
+                timeStyle: 'short' 
+              })}</span>
+            </div>
+          </div>
+          
+          <h3 style="color: #4F46E5;">What's Next?</h3>
+          <ul style="line-height: 1.8;">
+            <li>Our team will review your application carefully</li>
+            <li>You will receive an update via email within 5-7 business days</li>
+            <li>If shortlisted, you'll be contacted for the next steps</li>
+          </ul>
+          
+          <p style="margin-top: 30px;">If you have any questions or need to update your application, please contact us.</p>
+          
+          <div class="footer">
+            <p><strong>Runway VNEST Team</strong></p>
+            <p>Building the future, one startup at a time 🚀</p>
+          </div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+};
+
+// Send application notification email to admin
 export const sendApplicationEmail = async (data: any) => {
   const transporter = createEmailTransporter();
   
@@ -124,6 +207,28 @@ export const sendApplicationEmail = async (data: any) => {
     from: process.env.EMAIL_FROM,
     to: process.env.EMAIL_TO,
     subject: `New Application: ${data.startupName} - ${data.fullName}`,
+    html: emailHtml,
+  };
+  
+  await transporter.sendMail(mailOptions);
+};
+
+// Send confirmation email to applicant
+export const sendConfirmationEmail = async (data: {
+  fullName: string;
+  email: string;
+  registerNumber: string;
+  startupName: string;
+  submittedAt: string;
+}) => {
+  const transporter = createEmailTransporter();
+  
+  const emailHtml = generateConfirmationEmail(data);
+  
+  const mailOptions = {
+    from: process.env.EMAIL_FROM,
+    to: data.email,
+    subject: `✅ Application Received - ${data.startupName}`,
     html: emailHtml,
   };
   
