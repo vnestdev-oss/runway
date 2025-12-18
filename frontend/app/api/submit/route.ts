@@ -110,14 +110,23 @@ export async function POST(request: NextRequest) {
     const emailData = {
       fullName: studentDetails.fullName,
       registerNumber: studentDetails.registerNumber,
+      contactNumber: studentDetails.contactNumber,
       email: studentDetails.email,
+      schoolDepartment: studentDetails.schoolDepartment,
+      yearOfStudy: studentDetails.yearOfStudy,
       startupName: startupAbstract.startupName,
       problemStatement: startupAbstract.problemStatement,
       proposedSolution: startupAbstract.proposedSolution,
+      targetUsers: startupAbstract.targetUsers,
+      innovation: startupAbstract.innovation,
       pptLink: startupAbstract.pptLink,
       facultyName: facultyMentor.facultyName,
+      facultyDepartment: facultyMentor.facultyDepartment,
       facultyEmail: facultyMentor.facultyEmail,
+      facultyContact: facultyMentor.facultyContact,
+      facultyEmployeeId: facultyMentor.facultyEmployeeId,
       resources: resources,
+      consent: consent,
       submittedAt: submittedAt,
     };
 

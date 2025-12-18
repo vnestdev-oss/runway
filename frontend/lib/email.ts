@@ -17,14 +17,23 @@ export const createEmailTransporter = () => {
 export const generateApplicationEmail = (data: {
   fullName: string;
   registerNumber: string;
+  contactNumber: string;
   email: string;
+  schoolDepartment: string;
+  yearOfStudy: string;
   startupName: string;
   problemStatement: string;
   proposedSolution: string;
+  targetUsers: string;
+  innovation: string;
   pptLink: string;
   facultyName: string;
+  facultyDepartment: string;
   facultyEmail: string;
+  facultyContact: string;
+  facultyEmployeeId: string;
   resources: any[];
+  consent: boolean;
   submittedAt: string;
 }) => {
   const resourcesList = data.resources.length > 0
@@ -72,7 +81,10 @@ export const generateApplicationEmail = (data: {
           <div class="section-title">Student Details</div>
           <div class="field"><span class="label">Full Name:</span> ${data.fullName}</div>
           <div class="field"><span class="label">Register Number:</span> ${data.registerNumber}</div>
+          <div class="field"><span class="label">Contact Number:</span> ${data.contactNumber}</div>
           <div class="field"><span class="label">Email:</span> ${data.email}</div>
+          <div class="field"><span class="label">School/Department:</span> ${data.schoolDepartment}</div>
+          <div class="field"><span class="label">Year of Study:</span> ${data.yearOfStudy}</div>
         </div>
         
         <div class="section">
@@ -80,13 +92,18 @@ export const generateApplicationEmail = (data: {
           <div class="field"><span class="label">Startup Name:</span> ${data.startupName}</div>
           <div class="field"><span class="label">Problem Statement:</span> ${data.problemStatement}</div>
           <div class="field"><span class="label">Proposed Solution:</span> ${data.proposedSolution}</div>
+          <div class="field"><span class="label">Target Users/Market:</span> ${data.targetUsers}</div>
+          <div class="field"><span class="label">Innovation/Uniqueness:</span> ${data.innovation}</div>
           <div class="field"><span class="label">PPT Link:</span> <a href="${data.pptLink}">${data.pptLink}</a></div>
         </div>
         
         <div class="section">
           <div class="section-title">Faculty Mentor</div>
           <div class="field"><span class="label">Name:</span> ${data.facultyName}</div>
+          <div class="field"><span class="label">Department:</span> ${data.facultyDepartment}</div>
           <div class="field"><span class="label">Email:</span> ${data.facultyEmail}</div>
+          <div class="field"><span class="label">Contact Number:</span> ${data.facultyContact}</div>
+          <div class="field"><span class="label">Employee ID:</span> ${data.facultyEmployeeId}</div>
         </div>
         
         <div class="section">
@@ -108,6 +125,8 @@ export const generateApplicationEmail = (data: {
         </div>
         
         <div class="section">
+          <div class="section-title">Consent & Submission</div>
+          <div class="field"><span class="label">Consent Given:</span> ${data.consent ? 'Yes ✓' : 'No ✗'}</div>
           <div class="field"><span class="label">Submitted At:</span> ${new Date(data.submittedAt).toLocaleString()}</div>
         </div>
       </div>
@@ -133,7 +152,7 @@ export const generateConfirmationEmail = (data: {
         .header { background-color: #4F46E5; color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0; }
         .content { background-color: #ffffff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px; }
         .success-icon { font-size: 48px; margin-bottom: 10px; }
-        .highlight { background-color: #f0fdf4; padding: 15px; border-left: 4px solid #22c55e; margin: 20px 0; border-radius: 4px; }
+        .highlight { background-color: #f0fdf4; padding: 15px; margin: 20px 0; border-radius: 4px; }
         .info-box { background-color: #f9fafb; padding: 15px; border-radius: 8px; margin: 20px 0; }
         .info-row { margin: 10px 0; }
         .label { font-weight: bold; color: #555; }
@@ -145,7 +164,6 @@ export const generateConfirmationEmail = (data: {
     <body>
       <div class="container">
         <div class="header">
-          <div class="success-icon">✅</div>
           <h1 style="margin: 0; font-size: 28px;">Application Submitted Successfully!</h1>
         </div>
         
@@ -155,7 +173,7 @@ export const generateConfirmationEmail = (data: {
           <p>Thank you for submitting your application to <strong>Runway VNEST</strong>! We have successfully received your startup idea submission.</p>
           
           <div class="highlight">
-            <p style="margin: 0;"><strong>✨ Your application has been recorded and is now under review by our team.</strong></p>
+            <p style="margin: 0;"><strong>Your application has been recorded and is now under review by our team.</strong></p>
           </div>
           
           <div class="info-box">
@@ -180,11 +198,8 @@ export const generateConfirmationEmail = (data: {
           <h3 style="color: #4F46E5;">What's Next?</h3>
           <ul style="line-height: 1.8;">
             <li>Our team will review your application carefully</li>
-            <li>You will receive an update via email within 5-7 business days</li>
             <li>If shortlisted, you'll be contacted for the next steps</li>
           </ul>
-          
-          <p style="margin-top: 30px;">If you have any questions or need to update your application, please contact us.</p>
           
           <div class="footer">
             <p><strong>Runway VNEST Team</strong></p>
@@ -228,7 +243,7 @@ export const sendConfirmationEmail = async (data: {
   const mailOptions = {
     from: process.env.EMAIL_FROM,
     to: data.email,
-    subject: `✅ Application Received - ${data.startupName}`,
+    subject: `Application Received - ${data.startupName}`,
     html: emailHtml,
   };
   
