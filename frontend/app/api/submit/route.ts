@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Send email notification in parallel (don't wait for it)
+    // Prepare email data
     const emailData = {
       fullName: studentDetails.fullName,
       registerNumber: studentDetails.registerNumber,
@@ -130,23 +130,23 @@ export async function POST(request: NextRequest) {
       submittedAt: submittedAt,
     };
 
-    // Send admin notification email without blocking response
-    sendApplicationEmail(emailData).catch((error) => {
-      console.error("Admin email sending error:", error);
-      // Don't fail the request if email fails
-    });
-
-    // Send confirmation email to applicant without blocking response
-    sendConfirmationEmail({
-      fullName: studentDetails.fullName,
-      email: studentDetails.email,
-      registerNumber: studentDetails.registerNumber,
-      startupName: startupAbstract.startupName,
-      submittedAt: submittedAt,
-    }).catch((error) => {
-      console.error("Confirmation email sending error:", error);
-      // Don't fail the request if email fails
-    });
+    // Send both emails in parallel and wait for both to complete
+    try {
+      await Promise.all([
+        sendApplicationEmail(emailData),
+        sendConfirmationEmail({
+          fullName: studentDetails.fullName,
+          email: studentDetails.email,
+          registerNumber: studentDetails.registerNumber,
+          startupName: startupAbstract.startupName,
+          submittedAt: submittedAt,
+        })
+      ]);
+    } catch (emailError) {
+      console.error("Email sending error:", emailError);
+      // Continue even if emails fail - application is already saved
+      // You can optionally log this to a monitoring service
+    }
 
     // Return success response
     return NextResponse.json(
